@@ -1,78 +1,80 @@
-import { convertToModelMessages, streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { Resend } from "resend";
 
-export const maxDuration = 30;
-
-const openrouter = createOpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
 
-    if (!Array.isArray(messages)) {
-      return new Response("Invalid messages", { status: 400 });
+    console.log("CONTACT REQUEST:", body);
+    console.log(
+      "RESEND KEY EXISTS:",
+      Boolean(process.env.RESEND_API_KEY)
+    );
+
+    const {
+      name,
+      email,
+      projectType,
+      budget,
+      description,
+    } = body;
+
+    if (!name || !email || !description) {
+      return Response.json(
+        {
+          error: "لطفاً اطلاعات موردنیاز را کامل کنید.",
+        },
+        { status: 400 }
+      );
     }
 
-    const modelMessages = await convertToModelMessages(messages);
-
-    const result = streamText({
-      model: openrouter("openrouter/free"),
-      system: `
-تو B&B AI، دستیار هوشمند B&B Studio هستی.
-
-B&B Studio یک استودیوی کوچک و مستقل در زمینه طراحی و توسعه پروژه‌های دیجیتال است.
-
-خدمات:
-- طراحی سایت
-- برنامه‌نویسی
-- WordPress
-- WooCommerce
-- Elementor
-- طراحی UI/UX
-- توسعه امکانات سفارشی
-
-تعرفه‌های B&B Studio:
-
-سایت معرفی ساده: ۱ تا ۵ میلیون تومان
-سایت شرکتی: ۵ تا ۱۰ میلیون تومان
-فروشگاه WooCommerce: ۱۰ تا ۱۵ میلیون تومان
-طراحی اختصاصی UI/UX: ۱ تا ۵ میلیون تومان
-جستجو و فیلتر پیشرفته: ۱ تا ۳ میلیون تومان
-ورود و ثبت‌نام: ۱ تا ۳ میلیون تومان
-کد تخفیف: ۱ تا ۳ میلیون تومان
-امکانات سفارشی: ۵۰۰ هزار تا ۱۰ میلیون تومان
-
-برای Elementor، درگاه پرداخت، پنل مدیریت اختصاصی و محاسبه ارسال فعلاً هزینه جداگانه تعیین نشده است.
-
-قوانین:
-- همیشه فارسی پاسخ بده.
-- لحن دوستانه و حرفه‌ای داشته باش.
-- اگر کاربر فقط سلام کرد، کوتاه و طبیعی پاسخ بده.
-- پروژه را از نظر امکانات و پیچیدگی تحلیل کن.
-- قیمت‌ها را به‌صورت بازه تقریبی بیان کن.
-- هیچ قیمت یا زمان‌بندی را قطعی و تضمینی اعلام نکن.
-- اگر اطلاعات کافی نداری، سؤال بپرس.
-- قیمت نهایی بعد از بررسی دقیق پروژه مشخص می‌شود.
-- از HTML entity، زبان‌های تصادفی یا کاراکترهای عجیب استفاده نکن.
-- اگر درباره قیمت پروژه سؤال شد، فقط از تعرفه‌های بالا استفاده کن و خودت تعرفه جدید اختراع نکن.
-- برای امکاناتی که تعرفه جداگانه ندارند، هزینه جداگانه اضافه نکن.
-- اگر پروژه چند خدمت را شامل می‌شود، بازه‌های مربوط به خدمات را در نظر بگیر.
-`,
-      messages: modelMessages,
+    const result = await resend.emails.send({
+      from: "B&B Studio <onboarding@resend.dev>",
+      to: ["barman.bolhasani@gmail.com"],
+      replyTo: email,
+      subject: `درخواست پروژه جدید — ${projectType || "پروژه جدید"}`,
+      html: `
+        <div dir="rtl" style="font-family:Arial,sans-serif;line-height:2">
+          <h2>درخواست پروژه جدید از B&B Studio</h2>
+          <p><strong>نام:</strong> ${name}</p>
+          <p><strong>ایمیل:</strong> ${email}</p>
+          <p><strong>نوع پروژه:</strong> ${projectType || "مشخص نشده"}</p>
+          <p><strong>بودجه:</strong> ${budget || "مشخص نشده"}</p>
+          <hr />
+          <h3>توضیحات پروژه</h3>
+          <p style="white-space:pre-wrap">${description}</p>
+        </div>
+      `,
     });
 
-    return result.toUIMessageStreamResponse();
+    console.log("RESEND RESULT:", result);
+
+    if (result.error) {
+      return Response.json(
+        {
+          error: result.error.message,
+          details: result.error,
+        },
+        { status: 500 }
+      );
+    }
+
+    return Response.json({
+      success: true,
+      id: result.data?.id,
+    });
   } catch (error) {
-    console.error("CHAT API ERROR:", error);
+    console.error("CONTACT API ERROR:", error);
 
-    const message =
-      error instanceof Error ? error.message : String(error);
-
-    return new Response(`CHAT_API_ERROR: ${message}`, {
-      status: 500,
-    });
+    return Response.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
