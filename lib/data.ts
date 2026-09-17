@@ -6,6 +6,8 @@ export interface Member {
   skills: string[];
   email?: string;
   phone?: string;
+  platforms?: { name: string; url: string }[];
+  services?: string[];
 }
 
 export interface Project {
@@ -21,7 +23,7 @@ export const members: Member[] = [
     id: "barman",
     name: "بارمان",
     role: "توسعه‌دهنده وب و طراح رابط کاربری",
-    bio: "علاقه‌مند به فناوری، برنامه‌نویسی، طراحی وب و ساخت پروژه‌های دیجیتال. از یادگیری و تجربه‌کردن ابزارها و فناوری‌های جدید لذت می‌برم.",
+    bio: "علاقه‌مند به فناوری، برنامه‌نویسی، طراحی وب و ساخت پروژه‌های دیجیتال. از یادگیری و تجربه‌کردن ابزارها و فناوری‌های جدید لذت می‌برم. با برنامه‌ریزی زمانی مناسب، پروژه‌ها را به‌موقع و با دقت بالا تحویل می‌دهم.",
     skills: [
       "Python",
       "HTML",
@@ -29,11 +31,23 @@ export const members: Member[] = [
       "JavaScript",
       "WordPress",
       "Elementor",
+      "Web Design",
+      "UI Design",
       "Unreal Engine",
       "Godot",
       "Linux",
       "PySide6",
-      "UI Design",
+    ],
+    services: [
+      "طراحی صفحه HTML برای ارائه یا پروژه مدرسه",
+      "ساخت صفحات وب آموزشی (ریاضی، فیزیک، مطالب درسی)",
+      "ساخت فرم‌ها و صفحه‌های تعاملی",
+      "دیزاین سبک و منظم برای وب‌سایت",
+      "تحویل پروژه همراه با نسخه آزمایشی و اصلاحات",
+    ],
+    platforms: [
+      { name: "پارس‌کدرز", url: "https://parscoders.com" },
+      { name: "ژاکت", url: "https://jajet.ir" },
     ],
     email: "barman.bolhasani@gmail.com",
     phone: "09056133508",
