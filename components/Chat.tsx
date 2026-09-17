@@ -1,15 +1,19 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useState } from "react";
 
 export default function Chat() {
   const { messages, sendMessage, status, error } = useChat({
-    api: "/api/chat",
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
   });
 
   const [input, setInput] = useState("");
 
+  // ... بقیه کد دقیقاً همون قبلی
   const isLoading = status === "submitted" || status === "streaming";
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
