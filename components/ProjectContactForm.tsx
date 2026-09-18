@@ -356,8 +356,9 @@ export default function ProjectContactForm() {
           <label className="mb-2 block text-xs text-white/35">
             اسم شما
           </label>
-
+ 
           <input
+
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -365,6 +366,7 @@ export default function ProjectContactForm() {
             placeholder="مثلاً بارمان"
             className="w-full rounded-2xl border border-white/[0.07] bg-black/20 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/15 focus:border-white/[0.18]"
           />
+        
         </div>
 
         <div>
